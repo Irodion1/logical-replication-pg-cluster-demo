@@ -1,0 +1,66 @@
+version: '3.7'
+
+networks:
+  pg-cluster-network:
+    driver: bridge
+
+volumes:
+  pg-master-volume:
+  pg-replica-volume:
+  pgadmin-data:
+
+services:
+
+  pg-master:
+    image: postgres:15-alpine
+    hostname: pg-master
+    ports:
+      - "5441:5432"
+    restart: always
+    volumes:
+      - "pg-master-volume:/var/lib/postgresql/data"
+      - "$PWD/pg_conf_master.conf:/etc/postgresql/postgresql.conf"
+      - "$PWD/init/master/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh"
+    environment:
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+    networks:
+      - pg-cluster-network
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+
+  pg-replica:
+    image: postgres:15-alpine
+    hostname: pg-replica
+    ports:
+      - "5442:5432"
+    restart: always
+    volumes:
+      - "pg-replica-volume:/var/lib/postgresql/data"
+      - "$PWD/pg_conf_replica.conf:/etc/postgresql/postgresql.conf"
+      - "$PWD/init/replica/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh"
+    environment:
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+    networks:
+      - pg-cluster-network
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+
+    # It actually doesn't wait for pgsql to start, so init scripts for replica can still fail when try to connect master
+    depends_on:
+      - pg-master
+
+  # Just for basic monitoring stuff. NOT configured for created dbs, but you can use docker network hostnames to reach databases
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin_user@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    networks:
+      - pg-cluster-network
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - pg-master
+      - pg-replica
