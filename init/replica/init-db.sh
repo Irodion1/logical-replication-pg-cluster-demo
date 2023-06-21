@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+cp /var/lib/postgresql/.pgpass_bkp /var/lib/postgresql/.pgpass
+chmod 600 /var/lib/postgresql/.pgpass
+
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
   CREATE DATABASE dwh_test with owner postgres;
   \connect dwh_test
@@ -22,6 +25,6 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
       some_rng_variable int
   );
 
-  CREATE SUBSCRIPTION sub_usr CONNECTION 'host=pg-master port=5432 user=replicator dbname=users password=repl_password' PUBLICATION pub_usr_replicator WITH (create_slot=true);
-  CREATE SUBSCRIPTION sub_groups CONNECTION 'host=pg-master port=5432 user=replicator dbname=groups password=repl_password' PUBLICATION pub_gr_replicator WITH (create_slot=true);
+  CREATE SUBSCRIPTION sub_usr CONNECTION 'host=pg-master port=5432 user=replicator dbname=users PUBLICATION pub_usr_replicator WITH (create_slot=true);
+  CREATE SUBSCRIPTION sub_groups CONNECTION 'host=pg-master port=5432 user=replicator dbname=groups PUBLICATION pub_gr_replicator WITH (create_slot=true);
 EOSQL

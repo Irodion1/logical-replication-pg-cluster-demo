@@ -37,6 +37,7 @@ services:
       - "pg-replica-volume:/var/lib/postgresql/data"
       - "$PWD/pg_conf_replica.conf:/etc/postgresql/postgresql.conf"
       - "$PWD/init/replica/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh"
+      - "$PWD/.pgpass:/var/lib/postgresql/.pgpass_bkp"
     environment:
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
     networks:
