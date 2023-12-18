@@ -7,7 +7,7 @@ Please, don't consider it to be an example of a proper setup in production use, 
 3. Check results
 4. Delete container and volumes to start again hoping the next approach will be better :)
 
-> You can use this simple setup if you just to test something new in the cluster and have a way to restart clean fast.
+> You can use this simple setup if you just want to test something new in the cluster and want a fast way to restart from a clean state.
 
 ## Details
 #### Configuration
@@ -29,12 +29,12 @@ The cluster has initially:
 - Some initial data through `generate_series` only on master
 - `replicator` user with minimum rights as owner of publications on master with hardcoded password `repl_password`
 - Publications on master for each schema
-- _Probably_ subscriptions on the replica. It works mostly, but sometimes can fail if pg starts too slowly on master.
+- _Probably_ subscriptions on the replica. It works mostly, but sometimes can fail if PG starts too slowly on master.
 We don't care about it enough to pay attention to fixing it. In case it happens, just run 
 `CREATE SUBSCRIPTION ...` commands for replica manually
 
 ### Notes 
-> - `docker-compose` should be run from the root folder of the project as a working directory in order for relative paths to work properly
+> - `docker-compose` should be run from the root folder of the project as a working directory for relative paths to work properly
 > - Make sure you specified a location of `.env` file, it contains the password for `postgres` users 
 > - pgAdmin is accessible on the 5050 port, auth `admin_user@example.com:admin`. It is NOT configured for created DBs.
 > But all configurations will persist when you recreate PG containers/volumes
